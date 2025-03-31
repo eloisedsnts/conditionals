@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Interactif</title>
+    <style>
+        body {
+            background-color: #B3D9FF;
+            color: #003366;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            text-align: center;
+        }
+        input, button {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+    </style>
+    <script>
+        let questions = [
+            {text: "If we (have) ___ a yacht, we (sail) ___ the seven seas.", answers: [["had"], ["would sail"]]},
+            {text: "If he (have) ___ more time, he (learn) ___ karate.", answers: [["had"], ["would learn"]]},
+            {text: "If they (tell) ___ their father, he (be) ___ very angry.", answers: [["told"], ["would be"]]},
+            {text: "She (spend) ___ a year in the USA if it (be) ___ easier to get a green card.", answers: [["would spend"], ["were", "was"]]},
+            {text: "We (help) ___ you if we (know) ___ how.", answers: [["would help"], ["knew"]]},
+            {text: "My brother (buy) ___ a sports car if he (have) ___ the money.", answers: [["would buy"], ["had"]]},
+            {text: "If I (feel) ___ better, I (go) ___ to the cinema with you.", answers: [["felt"], ["would go"]]},
+            {text: "If you (go) ___ by bike more often, you (be/not) ___ so flabby.", answers: [["went"], ["would not be", "wouldn't be"]]},
+            {text: "She (not/talk) ___ to you if she (be) ___ mad at you.", answers: [["would not talk", "wouldn't talk"], ["were", "was"]]}
+        ];
+        
+        let currentQuestionIndex = 0;
+        let timer;
+        let timeLeft = 60;
+        let participants = {};
+        
+        function startQuiz() {
+            let name = document.getElementById("name").value.trim();
+            if (!name) {
+                alert("Veuillez entrer votre nom.");
+                return;
+            }
+            document.getElementById("welcome").style.display = "none";
+            document.getElementById("quiz").style.display = "block";
+            participants[name] = [];
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                endQuiz();
+                return;
+            }
+            
+            let question = questions[currentQuestionIndex];
+            document.getElementById("question").textContent = question.text;
+            document.getElementById("answer1").value = "";
+            document.getElementById("answer2").value = "";
+            document.getElementById("timer").textContent = `Temps restant : ${timeLeft}s`;
+            timeLeft = 60;
+            timer = setInterval(updateTimer, 1000);
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            document.getElementById("timer").textContent = `Temps restant : ${timeLeft}s`;
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                showAnswer();
+            }
+        }
+        
+        function submitAnswer() {
+            clearInterval(timer);
+            let userAnswer1 = document.getElementById("answer1").value.trim().toLowerCase();
+            let userAnswer2 = document.getElementById("answer2").value.trim().toLowerCase();
+            let question = questions[currentQuestionIndex];
+            let correctAnswers1 = question.answers[0].map(ans => ans.toLowerCase());
+            let correctAnswers2 = question.answers[1].map(ans => ans.toLowerCase());
+            let isCorrect1 = correctAnswers1.includes(userAnswer1);
+            let isCorrect2 = correctAnswers2.includes(userAnswer2);
+            
+            let name = Object.keys(participants)[0];
+            participants[name].push(isCorrect1 && isCorrect2);
+            showAnswer();
+        }
+        
+        function showAnswer() {
+            let correctAnswers = `${questions[currentQuestionIndex].answers[0].join(" / ")} - ${questions[currentQuestionIndex].answers[1].join(" / ")}`;
+            alert(`Bonne réponse : ${correctAnswers}`);
+            currentQuestionIndex++;
+            showQuestion();
+        }
+
+        function endQuiz() {
+            document.getElementById("quiz").style.display = "none";
+            let results = Object.keys(participants).map(name =>
+                `${name}: ${participants[name].filter(correct => correct).length}/${questions.length}`
+            ).join("\n");
+            alert("Résultats finaux :\n" + results);
+        }
+    </script>
+</head>
+<body>
+    <div id="welcome">
+        <h1>Bienvenue au Quiz</h1>
+        <input type="text" id="name" placeholder="Entrez votre nom">
+        <button onclick="startQuiz()">Commencer</button>
+    </div>
+    
+    <div id="quiz" style="display: none;">
+        <h2 id="question"></h2>
+        <p id="timer"></p>
+        <input type="text" id="answer1" placeholder="Première réponse">
+        <input type="text" id="answer2" placeholder="Deuxième réponse">
+        <button onclick="submitAnswer()">Soumettre</button>
+    </div>
+</body>
+</html>
